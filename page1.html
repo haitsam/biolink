@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judul Postingan</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            text-align: center;
+        }
+        header {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            font-size: 24px;
+        }
+        nav {
+            background: #0056b3;
+            padding: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        .comment-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .comment-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .comment-section button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .comment-list {
+            margin-top: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .comment-list p {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        footer {
+            background: #222;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>Blog Saya</header>
+    <nav>
+        <a href="index.html">Beranda</a>
+        <a href="#">Tentang</a>
+        <a href="#">Kontak</a>
+    </nav>
+    <div class="container">
+        <h1>Judul Postingan</h1>
+        <p>Ditulis oleh Admin | 1 Maret 2025</p>
+        <p>Isi artikel lengkap akan ditampilkan di sini...</p>
+        
+        <div class="comment-section">
+            <h3>Tambahkan Komentar</h3>
+            <textarea id="commentInput" rows="4" placeholder="Tulis komentar Anda..."></textarea>
+            <br>
+            <button onclick="addComment()">Kirim</button>
+        </div>
+        
+        <div class="comment-list" id="commentList">
+            <h3>Komentar</h3>
+        </div>
+    </div>
+    <footer>&copy; 2025 Blog Saya</footer>
+
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function addComment() {
+            let commentInput = document.getElementById("commentInput");
+            let commentText = commentInput.value.trim();
+            if (commentText !== "") {
+                db.collection("comments").add({
+                    text: commentText,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    commentInput.value = "";
+                    loadComments();
+                });
+            }
+        }
+
+        function loadComments() {
+            let commentList = document.getElementById("commentList");
+            commentList.innerHTML = "<h3>Komentar</h3>";
+            db.collection("comments").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    let commentElement = document.createElement("p");
+                    commentElement.textContent = doc.data().text;
+                    commentList.appendChild(commentElement);
+                });
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", loadComments);
+    </script>
+</body>
+</html>
