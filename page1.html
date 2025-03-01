@@ -95,9 +95,12 @@
         
         <div class="comment-section">
             <h3>Tambahkan Komentar</h3>
-            <textarea id="commentInput" rows="4" placeholder="Tulis komentar Anda..."></textarea>
-            <br>
-            <button onclick="addComment()">Kirim</button>
+            <form id="commentForm">
+              <input type="text" id="postId" placeholder="ID Postingan" required />
+              <input type="text" id="commenterName" placeholder="Nama Anda" required />
+              <textarea id="commentText" placeholder="Tulis komentar..." required></textarea>
+              <button type="submit">Kirim Komentar</button>
+            </form>
         </div>
         
         <div class="comment-list" id="commentList">
@@ -121,37 +124,46 @@
   };
 
   // Inisialisasi Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  // Fungsi untuk menambahkan komentar ke Firestore
-  async function addComment() {
-      let commentInput = document.getElementById("commentInput").value.trim();
-      if (commentInput !== "") {
-          await addDoc(collection(db, "comments"), {
-              text: commentInput,
-              timestamp: serverTimestamp()
-          });
-          document.getElementById("commentInput").value = "";
-          loadComments();
-      }
+// Fungsi untuk submit komentar
+const submitComment = async (event) => {
+  event.preventDefault(); // Mencegah reload halaman
+
+  // Ambil data dari form
+  const postId = document.getElementById("postId").value; 
+  const commenterName = document.getElementById("commenterName").value;
+  const commentText = document.getElementById("commentText").value;
+
+  // Validasi data tidak boleh kosong
+  if (!postId || !commenterName || !commentText) {
+    alert("Harap isi semua field sebelum mengirim!");
+    return;
   }
 
-  // Fungsi untuk memuat komentar dari Firestore
-  async function loadComments() {
-      let commentList = document.getElementById("commentList");
-      commentList.innerHTML = "<h3>Komentar</h3>";
+  try {
+    // Simpan ke Firestore
+    const docRef = await addDoc(collection(db, "comments"), {
+      postId: postId,
+      commenterName: commenterName,
+      commentText: commentText,
+      timestamp: serverTimestamp() // Menggunakan server timestamp
+    });
 
-      const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-          let commentElement = document.createElement("p");
-          commentElement.textContent = doc.data().text;
-          commentList.appendChild(commentElement);
-      });
+    console.log("Komentar berhasil disimpan dengan ID:", docRef.id);
+    alert("Komentar berhasil dikirim!");
+    
+    // Reset form setelah submit
+    document.getElementById("commentForm").reset();
+  } catch (e) {
+    console.error("Error saat menyimpan komentar:", e);
+    alert("Terjadi kesalahan, coba lagi.");
   }
+};
 
-  document.addEventListener("DOMContentLoaded", loadComments);
+// Tambahkan event listener ke tombol submit
+document.getElementById("commentForm").addEventListener("submit", submitComment);
 </script>
 
     
