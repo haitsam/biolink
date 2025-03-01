@@ -114,7 +114,9 @@
 
     <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { 
+    getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   // Konfigurasi Firebase Anda
   const firebaseConfig = {
@@ -127,94 +129,103 @@
   };
 
   // Inisialisasi Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-// Fungsi untuk submit komentar
-const submitComment = async (event) => {
-  event.preventDefault(); // Mencegah reload halaman
+  // Fungsi untuk submit komentar
+  const submitComment = async (event) => {
+    event.preventDefault(); // Mencegah reload halaman
 
-  // Ambil data dari form
-  const commenterName = document.getElementById("commenterName").value;
-  const commentText = document.getElementById("commentText").value;
+    // Ambil data dari form
+    const commenterName = document.getElementById("commenterName").value.trim();
+    const commentText = document.getElementById("commentText").value.trim();
 
-  // Validasi data tidak boleh kosong
-  if (!commenterName || !commentText) {
-    alert("Harap isi semua field sebelum mengirim!");
-    return;
-  }
-
-  try {
-    // Simpan ke Firestore
-    const docRef = await addDoc(collection(db, "comments"), {
-      commenterName: commenterName,
-      commentText: commentText,
-      timestamp: serverTimestamp() // Menggunakan server timestamp
-    });
-
-    console.log("Komentar berhasil disimpan dengan ID:", docRef.id);
-    alert("Komentar berhasil dikirim!");
-    
-    // Reset form setelah submit
-    document.getElementById("commentForm").reset();
-  } catch (e) {
-    console.error("Error saat menyimpan komentar:", e);
-    alert("Terjadi kesalahan, coba lagi.");
-  }
-};
-
-// 🔹 Fungsi untuk memuat komentar berdasarkan nama pengguna
-async function loadCommentsByUser(commenterName) {
-  const commentsContainer = document.getElementById("commentsList");
-  commentsContainer.innerHTML = "<p>Memuat komentar...</p>";
-
-  try {
-    // Query Firestore untuk mengambil komentar berdasarkan commenterName
-    const q = query(
-      collection(db, "comments"),
-      where("commenterName", "==", commenterName), // Filter berdasarkan nama pengguna
-      orderBy("timestamp", "desc")
-    );
-
-    const querySnapshot = await getDocs(q);
-
-    commentsContainer.innerHTML = ""; // Bersihkan sebelum menampilkan
-
-    if (querySnapshot.empty) {
-      commentsContainer.innerHTML = "<p>Tidak ada komentar dari pengguna ini.</p>";
+    // Validasi data tidak boleh kosong
+    if (!commenterName || !commentText) {
+      alert("Harap isi semua field sebelum mengirim!");
       return;
     }
 
-    querySnapshot.forEach((doc) => {
-      const comment = doc.data();
-      const commentElement = document.createElement("div");
-      commentElement.classList.add("comment");
-      commentElement.innerHTML = `
-        <p><strong>${comment.commenterName}</strong>: ${comment.commentText}</p>
-        <small>${new Date(comment.timestamp?.seconds * 1000).toLocaleString()}</small>
-        <hr>
-      `;
-      commentsContainer.appendChild(commentElement);
+    try {
+      // Simpan ke Firestore
+      const docRef = await addDoc(collection(db, "comments"), {
+        commenterName: commenterName,
+        commentText: commentText,
+        timestamp: serverTimestamp() // Menggunakan server timestamp
+      });
+
+      console.log("Komentar berhasil disimpan dengan ID:", docRef.id);
+      alert("Komentar berhasil dikirim!");
+
+      // Reset form setelah submit
+      document.getElementById("commentForm").reset();
+    } catch (e) {
+      console.error("Error saat menyimpan komentar:", e);
+      alert("Terjadi kesalahan, coba lagi.");
+    }
+  };
+
+  // Fungsi untuk memuat komentar berdasarkan nama pengguna
+  async function loadCommentsByUser(commenterName) {
+    const commentsContainer = document.getElementById("commentsList");
+    commentsContainer.innerHTML = "<p>Memuat komentar...</p>";
+
+    try {
+      // Query Firestore untuk mengambil komentar berdasarkan commenterName
+      const q = query(
+        collection(db, "comments"),
+        where("commenterName", "==", commenterName), // Filter berdasarkan nama pengguna
+        orderBy("timestamp", "desc")
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      commentsContainer.innerHTML = ""; // Bersihkan sebelum menampilkan
+
+      if (querySnapshot.empty) {
+        commentsContainer.innerHTML = "<p>Tidak ada komentar dari pengguna ini.</p>";
+        return;
+      }
+
+      querySnapshot.forEach((doc) => {
+        const comment = doc.data();
+        const timestamp = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleString() : "Waktu tidak tersedia";
+        
+        const commentElement = document.createElement("div");
+        commentElement.classList.add("comment");
+        commentElement.innerHTML = `
+          <p><strong>${comment.commenterName}</strong>: ${comment.commentText}</p>
+          <small>${timestamp}</small>
+          <hr>
+        `;
+        commentsContainer.appendChild(commentElement);
+      });
+    } catch (error) {
+      console.error("Error saat mengambil komentar:", error);
+      commentsContainer.innerHTML = "<p>Gagal memuat komentar.</p>";
+    }
+  }
+
+  // Pastikan tombol filter ada sebelum menambahkan event listener
+  const filterButton = document.getElementById("filterButton");
+  if (filterButton) {
+    filterButton.addEventListener("click", () => {
+      const commenterName = document.getElementById("commenterNameInput").value.trim();
+      if (commenterName) {
+        loadCommentsByUser(commenterName);
+      } else {
+        alert("Masukkan nama pengguna!");
+      }
     });
-  } catch (error) {
-    console.error("Error saat mengambil komentar:", error);
-    commentsContainer.innerHTML = "<p>Gagal memuat komentar.</p>";
   }
-}
 
-// 🔹 Event listener untuk tombol filter berdasarkan nama
-document.getElementById("filterButton").addEventListener("click", () => {
-  const commenterName = document.getElementById("commenterNameInput").value;
-  if (commenterName) {
-    loadCommentsByUser(commenterName);
-  } else {
-    alert("Masukkan nama pengguna!");
+  // Tambahkan event listener ke tombol submit jika elemen tersedia
+  const commentForm = document.getElementById("commentForm");
+  if (commentForm) {
+    commentForm.addEventListener("submit", submitComment);
   }
-});
-
-// Tambahkan event listener ke tombol submit
-document.getElementById("commentForm").addEventListener("submit", submitComment);
 </script>
+
 
     
 </body>
