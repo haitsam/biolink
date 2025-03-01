@@ -27,7 +27,23 @@
     <h1>Halo, Saya Haitsam!</h1>
     <p>Temukan link penting saya di bawah ini:</p>
     <a href="shopee.html" class="link">Shopee Affiliate</a>
+    <select class="link" onchange="openShopeeLink(this.value)">
+        <option value="">Pilih Produk Shopee</option>
+        <option value="https://shopee.co.id/product1-affiliate-link">Produk 1</option>
+        <option value="https://shopee.co.id/product2-affiliate-link">Produk 2</option>
+        <option value="https://shopee.co.id/product3-affiliate-link">Produk 3</option>
+    </select>
+
     <a href="https://tokopedia.com/affiliate-link" class="link">Tokopedia Affiliate</a>
     <a href="https://blogkamu.com" class="link">Blog Saya</a>
+
+    <script>
+    function openShopeeLink(url) {
+        if (url) {
+            window.location.href = url;
+        }
+    }
+</script>
+
 </body>
 </html>
