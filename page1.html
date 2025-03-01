@@ -96,12 +96,15 @@
         <div class="comment-section">
             <h3>Tambahkan Komentar</h3>
             <form id="commentForm">
-              <input type="text" id="postId" placeholder="ID Postingan" required />
               <input type="text" id="commenterName" placeholder="Nama Anda" required />
               <textarea id="commentText" placeholder="Tulis komentar..." required></textarea>
               <button type="submit">Kirim Komentar</button>
             </form>
         </div>
+
+        <h2>Filter Komentar Berdasarkan Nama</h2>
+        <input type="text" id="commenterNameInput" placeholder="Masukkan nama pengguna">
+        <button id="filterButton">Cari Komentar</button>
         
         <div class="comment-list" id="commentList">
             <h3>Komentar</h3>
@@ -145,7 +148,6 @@ const submitComment = async (event) => {
   try {
     // Simpan ke Firestore
     const docRef = await addDoc(collection(db, "comments"), {
-      postId: postId,
       commenterName: commenterName,
       commentText: commentText,
       timestamp: serverTimestamp() // Menggunakan server timestamp
@@ -161,6 +163,55 @@ const submitComment = async (event) => {
     alert("Terjadi kesalahan, coba lagi.");
   }
 };
+
+// 🔹 Fungsi untuk memuat komentar berdasarkan nama pengguna
+async function loadCommentsByUser(commenterName) {
+  const commentsContainer = document.getElementById("commentsList");
+  commentsContainer.innerHTML = "<p>Memuat komentar...</p>";
+
+  try {
+    // Query Firestore untuk mengambil komentar berdasarkan commenterName
+    const q = query(
+      collection(db, "comments"),
+      where("commenterName", "==", commenterName), // Filter berdasarkan nama pengguna
+      orderBy("timestamp", "desc")
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    commentsContainer.innerHTML = ""; // Bersihkan sebelum menampilkan
+
+    if (querySnapshot.empty) {
+      commentsContainer.innerHTML = "<p>Tidak ada komentar dari pengguna ini.</p>";
+      return;
+    }
+
+    querySnapshot.forEach((doc) => {
+      const comment = doc.data();
+      const commentElement = document.createElement("div");
+      commentElement.classList.add("comment");
+      commentElement.innerHTML = `
+        <p><strong>${comment.commenterName}</strong>: ${comment.commentText}</p>
+        <small>${new Date(comment.timestamp?.seconds * 1000).toLocaleString()}</small>
+        <hr>
+      `;
+      commentsContainer.appendChild(commentElement);
+    });
+  } catch (error) {
+    console.error("Error saat mengambil komentar:", error);
+    commentsContainer.innerHTML = "<p>Gagal memuat komentar.</p>";
+  }
+}
+
+// 🔹 Event listener untuk tombol filter berdasarkan nama
+document.getElementById("filterButton").addEventListener("click", () => {
+  const commenterName = document.getElementById("commenterNameInput").value;
+  if (commenterName) {
+    loadCommentsByUser(commenterName);
+  } else {
+    alert("Masukkan nama pengguna!");
+  }
+});
 
 // Tambahkan event listener ke tombol submit
 document.getElementById("commentForm").addEventListener("submit", submitComment);
