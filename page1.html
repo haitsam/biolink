@@ -135,12 +135,11 @@ const submitComment = async (event) => {
   event.preventDefault(); // Mencegah reload halaman
 
   // Ambil data dari form
-  const postId = document.getElementById("postId").value; 
   const commenterName = document.getElementById("commenterName").value;
   const commentText = document.getElementById("commentText").value;
 
   // Validasi data tidak boleh kosong
-  if (!postId || !commenterName || !commentText) {
+  if (!commenterName || !commentText) {
     alert("Harap isi semua field sebelum mengirim!");
     return;
   }
