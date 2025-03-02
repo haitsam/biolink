@@ -101,10 +101,6 @@
               <button type="submit">Kirim Komentar</button>
             </form>
         </div>
-
-        <h2>Filter Komentar Berdasarkan Nama</h2>
-        <input type="text" id="commenterNameInput" placeholder="Masukkan nama pengguna">
-        <button id="filterButton">Cari Komentar</button>
         
         <div class="comment-list" id="commentList">
             <h3>Komentar</h3>
@@ -166,58 +162,46 @@
   };
 
   // Fungsi untuk memuat komentar berdasarkan nama pengguna
-  async function loadCommentsByUser(commenterName) {
-    const commentsContainer = document.getElementById("commentList");
-    commentsContainer.innerHTML = "<p>Memuat komentar...</p>";
+  async function loadAllComments() {
+  const commentsContainer = document.getElementById("commentsList");
+  commentsContainer.innerHTML = "<p>Memuat komentar...</p>";
 
-    try {
-      // Query Firestore untuk mengambil komentar berdasarkan commenterName
-      const q = query(
-        collection(db, "comments"),
-        where("commenterName", "==", commenterName), // Filter berdasarkan nama pengguna
-        orderBy("timestamp", "desc")
-      );
+  try {
+    // Query Firestore untuk mengambil semua komentar
+    const q = query(
+      collection(db, "comments"),
+      orderBy("timestamp", "desc") // Urutkan dari yang terbaru
+    );
 
-      const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(q);
 
-      commentsContainer.innerHTML = ""; // Bersihkan sebelum menampilkan
+    commentsContainer.innerHTML = ""; // Bersihkan sebelum menampilkan
 
-      if (querySnapshot.empty) {
-        commentsContainer.innerHTML = "<p>Tidak ada komentar dari pengguna ini.</p>";
-        return;
-      }
-
-      querySnapshot.forEach((doc) => {
-        const comment = doc.data();
-        const timestamp = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleString() : "Waktu tidak tersedia";
-        
-        const commentElement = document.createElement("div");
-        commentElement.classList.add("comment");
-        commentElement.innerHTML = `
-          <p><strong>${comment.commenterName}</strong>: ${comment.commentText}</p>
-          <small>${timestamp}</small>
-          <hr>
-        `;
-        commentsContainer.appendChild(commentElement);
-      });
-    } catch (error) {
-      console.error("Error saat mengambil komentar:", error);
-      commentsContainer.innerHTML = "<p>Gagal memuat komentar.</p>";
+    if (querySnapshot.empty) {
+      commentsContainer.innerHTML = "<p>Belum ada komentar.</p>";
+      return;
     }
-  }
 
-  // Pastikan tombol filter ada sebelum menambahkan event listener
-  const filterButton = document.getElementById("filterButton");
-  if (filterButton) {
-    filterButton.addEventListener("click", () => {
-      const commenterName = document.getElementById("commenterNameInput").value.trim();
-      if (commenterName) {
-        loadCommentsByUser(commenterName);
-      } else {
-        alert("Masukkan nama pengguna!");
-      }
+    querySnapshot.forEach((doc) => {
+      const comment = doc.data();
+      const commentElement = document.createElement("div");
+      commentElement.classList.add("comment");
+      commentElement.innerHTML = `
+        <p><strong>${comment.commenterName}</strong>: ${comment.commentText}</p>
+        <small>${new Date(comment.timestamp?.seconds * 1000).toLocaleString()}</small>
+        <hr>
+      `;
+      commentsContainer.appendChild(commentElement);
     });
+  } catch (error) {
+    console.error("Error saat mengambil komentar:", error);
+    commentsContainer.innerHTML = "<p>Gagal memuat komentar.</p>";
   }
+}
+
+// Panggil fungsi saat halaman selesai dimuat
+document.addEventListener("DOMContentLoaded", loadAllComments);
+
 
   // Tambahkan event listener ke tombol submit jika elemen tersedia
   const commentForm = document.getElementById("commentForm");
