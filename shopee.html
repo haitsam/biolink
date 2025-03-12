@@ -21,9 +21,79 @@
             width: 250px;
             margin: 10px auto;
         }
+
+        /* Style dasar untuk navigasi tab */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  background-color: #f1f1f1;
+}
+
+.tab.active {
+  border-bottom: 3px solid #007bff;
+  font-weight: bold;
+  color: #007bff;
+}
+
+/* Style untuk konten tab */
+.tab-content {
+  display: none;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-top: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
     </style>
 </head>
 <body>
+
+    <div class="tabs">
+        <button class="tab active">Perawatan & Kecantikan</button>
+        <button class="tab">Peralatan Masak</button>
+        <button class="tab">Celana Panjang Pria</button>
+        <button class="tab">Dress Muslimah</button>
+    </div>
+    <div class="tab-content active">
+        <h2>Perawatan & Kecantikan</h2>
+        <p>Ini adalah isi dari Tab 1.</p>
+        <a href="https://s.shopee.co.id/5AeIN6GnRs" class="link"> Perawatan & Kecantikan - Lumiwhite Package Series(FREE 1 FACEMIST 30ml + 2 SACHET RANDOM)</a>
+        <a href="https://s.shopee.co.id/9AAR9JKNMb" class="link"> Perawatan & Kecantikan - MAYBELLINE OFFICIAL Superstay Matte </a>
+        <a href="https://s.shopee.co.id/4L5BQOfwn4" class="link"> Perawatan & Kecantikan - SKINTIFIC - Acid Peeling Solution Serum 30ml </a>
+    </div>
+    <div class="tab-content">
+        <h2>Peralatan Masak</h2>
+        <p>Ini adalah isi dari Tab 2.</p>
+        <a href="https://s.shopee.co.id/1LRZpJLwuf" class="link"> Peralatan Masak - Hongzhuo Cookware </a>
+    </div>
+    <div class="tab-content">
+        <h2>Celana Panjang Pria</h2>
+        <p>Ini adalah isi dari Tab 3.</p>
+        <a href="https://s.shopee.co.id/1LRZohkNFW" class="link"> Celana Pria Panjang - Mallvose - Celana Pria Chino Premium Panjang</a>
+        <a href="https://s.shopee.co.id/4AllDqqu3e" class="link"> Celana Pria Panjang - PROMO [BELI 1 GRATIS 1] Celana Cargo Panjang Pria </a>
+    </div>
+    <div class="tab-content">
+        <h2>Dress Muslimah</h2>
+        <p>Ini adalah isi dari Tab 3.</p>
+        <a href="https://s.shopee.co.id/7V2DBeUtqW" class="link"> Dress Muslimah - Alexa Abaya </a>
+    </div>
+    
     <h1>shopee product selection</h1>
     <p>choose the products you need:</p>
     <a href="https://s.shopee.co.id/5AeIN6GnRs" class="link"> Perawatan & Kecantikan - Lumiwhite Package Series(FREE 1 FACEMIST 30ml + 2 SACHET RANDOM)</a>
@@ -31,10 +101,28 @@
     <a href="https://s.shopee.co.id/4L5BQOfwn4" class="link"> Perawatan & Kecantikan - SKINTIFIC - Acid Peeling Solution Serum 30ml </a>
     <a href="https://s.shopee.co.id/9pQ7wBDWeH" class="link"> Pembasmi Hama & Gulma - Hogasan anti serangga</a>
     <a href="https://s.shopee.co.id/1LRZohkNFW" class="link"> Celana Pria Panjang - Mallvose - Celana Pria Chino Premium Panjang</a>
+    <a href="https://s.shopee.co.id/4AllDqqu3e" class="link"> Celana Pria Panjang - PROMO [BELI 1 GRATIS 1] Celana Cargo Panjang Pria </a>
     <a href="https://s.shopee.co.id/1LRZpJLwuf" class="link"> Peralatan Masak - Hongzhuo Cookware </a>
     <a href="https://s.shopee.co.id/7V2DBeUtqW" class="link"> Dress Muslimah - Alexa Abaya </a>
     <a href="https://s.shopee.co.id/20hGeOcst8" class="link"> Baju Anak - Setelan Baju Anak Perempuan 1-4 Tahun </a>
-    <a href="https://s.shopee.co.id/4AllDqqu3e" class="link"> Celana Pria Panjang - PROMO [BELI 1 GRATIS 1] Celana Cargo Panjang Pria </a>
     <a href="index.html" class="link" style="background: gray;">Kembali ke home</a>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const tabs = document.querySelectorAll(".tab");
+            const contents = document.querySelectorAll(".tab-content");
+            
+            tabs.forEach((tab, index) => {
+                tab.addEventListener("click", () => {
+                    tabs.forEach(t => t.classList.remove("active"));
+                    contents.forEach(c => c.classList.remove("active"));
+                    
+                    tab.classList.add("active");
+                    contents[index].classList.add("active");
+                });
+            });
+        });
+    </script>
 </body>
 </html>
